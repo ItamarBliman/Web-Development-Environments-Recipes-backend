@@ -34,7 +34,6 @@ exports.getRecipeDetails = async function getRecipeDetails(recipe_id) {
         vegan: vegan,
         vegetarian: vegetarian,
         glutenFree: glutenFree,
-
     }
 }
 
@@ -50,13 +49,12 @@ exports.getThreeRandomRecipes = async function getThreeRandomRecipes() {
             apiKey: process.env.spooncular_apiKey
         }
     });
-    console.log(data.data.recipes.length);
     return data.data.recipes;
 }
 
-exports.getFromSearchRecipes = async function getFromSearchRecipes({ searchTerm, quantity, cuisine, diet, intolerances }) {
+exports.getFromSearchRecipes = async function getFromSearchRecipes({ searchTerm, quantity, cuisine, diet, intolerances, sortBy }) {
     const finalQuantity = quantity ? quantity : 5;
-    
+
     const data = await axios.get(`${api_domain}/complexSearch`, {
         params: {
             query: searchTerm,
@@ -64,10 +62,64 @@ exports.getFromSearchRecipes = async function getFromSearchRecipes({ searchTerm,
             cuisine: cuisine,
             diet: diet,
             intolerances: intolerances,
+            instructionsRequired: true,
+            addRecipeInformation: true,
+            sort: sortBy,
             apiKey: process.env.spooncular_apiKey
         }
     });
-    console.log(data.data.results);
     return data.data.results;
+}
+
+exports.checkSession = async function checkSession(req) {
+    let user_id;
+    if (req.session && req.session.user_id) {
+        await DButils.execQuery("SELECT user_id FROM users").then((users) => {
+            if (users.find((x) => x.user_id === req.session.user_id)) {
+                user_id = req.session.user_id;
+            }
+        });
+    }
+    return user_id;
+}
+
+
+exports.getPreviewRecipes = async function getPreviewRecipes(arrayRecipes, user_id) {
+    const arrayPreviewRecipes = arrayRecipes.map(recipe => {
+        return {
+            recipe_id: recipe.id,
+            name: recipe.title,
+            preparationTimeInMinutes: recipe.readyInMinutes,
+            imageURL: recipe.image,
+            numOfLikes: recipe.aggregateLikes,
+            vegan: recipe.vegan,
+            vegetarian: recipe.vegetarian,
+            glutenFree: recipe.glutenFree,
+            favorite: false,
+            watched: false
+        };
+    });
+
+    if (user_id) {
+        const favoriteRecipes = await DButils.execQuery(`select recipe_id from favoriteRecipes where user_id = '${user_id}'`);
+        const watchedRecipes = await DButils.execQuery(`select recipe_id from watchedRecipes where user_id = '${user_id}'`);
+        arrayPreviewRecipes.forEach(recipe => {
+            if (favoriteRecipes.find(element => element.recipe_id === recipe.recipe_id)) {
+                recipe.favorite = true;
+            }
+            if (watchedRecipes.find(element => element.recipe_id === recipe.recipe_id)) {
+                recipe.watched = true;
+            }
+        });
+    }
+    return arrayPreviewRecipes;
+}
+
+exports.getInfoRecipes = async function getInfoRecipes(recipes_id) {
+    const promises = [];
+    recipes_id.map(element => {
+        promises.push(exports.getRecipeDetails(element.recipe_id));
+    });
+    return await Promise.all(promises);
 }
 

@@ -37,8 +37,7 @@ CREATE TABLE
         user_id INT,
         recipe_id INT,
         PRIMARY KEY (user_id, recipe_id),
-        FOREIGN KEY (user_id) REFERENCES users(user_id),
-        FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id)
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
     );
 
 CREATE TABLE
@@ -46,13 +45,15 @@ CREATE TABLE
         user_id INT,
         recipe_id INT,
         PRIMARY KEY (user_id, recipe_id),
-        FOREIGN KEY (user_id) REFERENCES users(user_id),
-        FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id)
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
     );
 
 CREATE TABLE
     familyRecipe (
         recipe_id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100),
+        imageURL VARCHAR(255),
+        preparationTimeInMinutes INT,
         author VARCHAR(100),
         occasion VARCHAR(100),
         ingredients TEXT,
