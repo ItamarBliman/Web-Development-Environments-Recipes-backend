@@ -9,30 +9,25 @@ router.post("/Register", async (req, res, next) => {
     // parameters exists
     // valid parameters
     // username exists
-    let user_details = {
-      username: req.body.username,
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
-      country: req.body.country,
-      password: req.body.password,
-      email: req.body.email,
-      profilePic: req.body.profilePic
-    }
+    const { username, password, firstname, lastname, country, email } = req.body;
+
     let users = [];
     users = await DButils.execQuery("SELECT username from users");
 
-    if (users.find((x) => x.username === user_details.username))
+    if (users.find((x) => x.username === username))
       throw { status: 409, message: "Username taken" };
 
     // add the new username
     let hash_password = bcrypt.hashSync(
-      user_details.password,
+      password,
       parseInt(process.env.bcrypt_saltRounds)
     );
     await DButils.execQuery(
-      `INSERT INTO users VALUES ('${user_details.username}', '${user_details.firstname}', '${user_details.lastname}',
-      '${user_details.country}', '${hash_password}', '${user_details.email}')`
+      `INSERT INTO users (username, firstname, lastname, country, password, email) VALUES ('${username}', '${firstname}', '${lastname}', '${country}', '${hash_password}', '${email}')`
     );
+    // await DButils.execQuery(
+    //   `INSERT INTO users VALUES ('${username}', '${firstname}', '${lastname}', '${country}', '${hash_password}', '${email}')`
+    // );
     res.status(201).send({ message: "user created", success: true });
   } catch (error) {
     next(error);

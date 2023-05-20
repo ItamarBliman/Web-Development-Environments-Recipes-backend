@@ -2,7 +2,41 @@ var express = require("express");
 var router = express.Router();
 const recipes_utils = require("./utils/recipes_utils");
 
-router.get("/", (req, res) => res.send("im here"));
+// router.get("/", (req, res) => res.send("im here"));
+
+/**
+ * This path returns all the family recipes
+ */
+router.get("/familyRecipes", async (req, res, next) => {
+  try {
+    res.send(await recipes_utils.getFamilyRecipes());
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+/**
+ * This path returns all the family recipes
+ */
+router.get("/random", async (req, res, next) => {
+  try {
+    res.send(await recipes_utils.getThreeRandomRecipes());
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * This path returns all the family recipes
+ */
+router.get("/search", async (req, res, next) => {
+  try {
+    res.send(await recipes_utils.getFromSearchRecipes(req.query));
+  } catch (error) {
+    next(error);
+  }
+});
 
 
 /**
@@ -16,5 +50,6 @@ router.get("/:recipeId", async (req, res, next) => {
     next(error);
   }
 });
+
 
 module.exports = router;
