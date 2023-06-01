@@ -19,26 +19,70 @@ async function getRecipeInformation(recipe_id) {
     });
 }
 
-
-
 exports.getRecipeDetails = async function getRecipeDetails(recipe_id) {
-    let recipe_info = await getRecipeInformation(recipe_id);
-    let { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree } = recipe_info.data;
+    const { data } = await getRecipeInformation(recipe_id);
+    const { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, extendedIngredients, instructions, servings } = data;
+
+    let extendedIngredientsString = "";
+    extendedIngredients?.forEach(ingredient => {
+        extendedIngredientsString += ingredient.name + " " + ingredient.amount + " " + (ingredient.unit || "unit") + ",";
+    });
+
+    if (extendedIngredientsString.length > 0) {
+        extendedIngredientsString = extendedIngredientsString.substring(0, extendedIngredientsString.length - 1);
+    }
 
     return {
         id: id,
         title: title,
         readyInMinutes: readyInMinutes,
         image: image,
-        popularity: aggregateLikes,
+        aggregateLikes: aggregateLikes,
         vegan: vegan,
         vegetarian: vegetarian,
         glutenFree: glutenFree,
+        extendedIngredients: extendedIngredientsString,
+        instructions: instructions,
+        servings: servings,
+        favorite: false,
+        watched: false
     }
 }
 
-exports.getFamilyRecipes = async function getFamilyRecipes() {
-    return await DButils.execQuery(`select * from familyRecipe`);
+
+exports.getFavoriteWatched = async function getFavoriteWatched(recipe, user_id) {
+    const favoriteRecipes = await DButils.execQuery(`select recipe_id from favoriteRecipes where user_id=${user_id} and recipe_id=${recipe.id}`);
+    const watchedRecipes = await DButils.execQuery(`select recipe_id from watchedRecipes where user_id=${user_id} and recipe_id=${recipe.id}`);
+    if (favoriteRecipes.length > 0) {
+        recipe.favorite = true;
+    }
+    if (watchedRecipes.length > 0) {
+        recipe.watched = true;
+    }
+    return recipe;
+}
+
+
+exports.getMyRecipeDetails = async function getMyRecipeDetails(minus_recipe_id, user_id) {
+    const recipe_info = await DButils.execQuery(`select * from recipes where recipe_id='${minus_recipe_id * (-1)}' and user_id='${user_id}'`);
+    if (recipe_info.length == 0) {
+        throw { status: 404, message: "Recipe not found" };
+    }
+    const { recipe_id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, extendedIngredients, instructions, servings } = recipe_info[0];
+
+    return {
+        id: recipe_id,
+        title: title,
+        readyInMinutes: readyInMinutes,
+        image: image,
+        aggregateLikes: aggregateLikes,
+        vegan: vegan,
+        vegetarian: vegetarian,
+        glutenFree: glutenFree,
+        extendedIngredients: extendedIngredients,
+        instructions: instructions,
+        servings: servings
+    }
 }
 
 
@@ -87,11 +131,11 @@ exports.checkSession = async function checkSession(req) {
 exports.getPreviewRecipes = async function getPreviewRecipes(arrayRecipes, user_id) {
     const arrayPreviewRecipes = arrayRecipes.map(recipe => {
         return {
-            recipe_id: recipe.id,
-            name: recipe.title,
-            preparationTimeInMinutes: recipe.readyInMinutes,
-            imageURL: recipe.image,
-            numOfLikes: recipe.aggregateLikes,
+            id: recipe.id,
+            title: recipe.title,
+            readyInMinutes: recipe.readyInMinutes,
+            image: recipe.image,
+            aggregateLikes: recipe.aggregateLikes,
             vegan: recipe.vegan,
             vegetarian: recipe.vegetarian,
             glutenFree: recipe.glutenFree,
@@ -104,10 +148,10 @@ exports.getPreviewRecipes = async function getPreviewRecipes(arrayRecipes, user_
         const favoriteRecipes = await DButils.execQuery(`select recipe_id from favoriteRecipes where user_id = '${user_id}'`);
         const watchedRecipes = await DButils.execQuery(`select recipe_id from watchedRecipes where user_id = '${user_id}'`);
         arrayPreviewRecipes.forEach(recipe => {
-            if (favoriteRecipes.find(element => element.recipe_id === recipe.recipe_id)) {
+            if (favoriteRecipes.find(element => element.recipe_id === recipe.id)) {
                 recipe.favorite = true;
             }
-            if (watchedRecipes.find(element => element.recipe_id === recipe.recipe_id)) {
+            if (watchedRecipes.find(element => element.recipe_id === recipe.id)) {
                 recipe.watched = true;
             }
         });

@@ -35,8 +35,10 @@ router.post('/favorites', async (req, res, next) => {
       throw { status: 400, message: "recipe_id must be an integer" };
     }
     await user_utils.markAsFavorite(user_id, recipe_id);
-    res.send({ status: 200, message: "The Recipe successfully saved as favorite" });
+    res.send({ status: 200, message: "The recipe successfully saved as favorite" });
   } catch (error) {
+    if (error.code == 'ER_DUP_ENTRY')
+      error = { status: 409, message: "The recipe already saved as favorite" };
     next(error);
   }
 })
@@ -70,8 +72,10 @@ router.post('/watched', async (req, res, next) => {
       throw { status: 400, message: "recipe_id must be an integer" };
     }
     await user_utils.markAsWatched(user_id, recipe_id);
-    res.send({ status: 200, message: "The Recipe successfully saved as watched" });
+    res.send({ status: 200, message: "The recipe successfully saved as watched" });
   } catch (error) {
+    if (error.code == 'ER_DUP_ENTRY')
+      error = { status: 409, message: "The recipe already saved as watched" };
     next(error);
   }
 })
@@ -103,9 +107,9 @@ router.delete('/favorites/:recipe_id', async (req, res, next) => {
     }
     const result = await user_utils.removeFromFavorite(user_id, recipe_id);
     if (result.affectedRows === 0) {
-      throw { status: 404, message: "The Recipe is not in the favorite list" };
+      throw { status: 404, message: "The recipe is not in the favorite list" };
     }
-    res.send({ status: 200, message: "The Recipe successfully removed from favorite" });
+    res.send({ status: 200, message: "The recipe successfully removed from favorite" });
   } catch (error) {
     next(error);
   }
@@ -123,7 +127,7 @@ router.post('/createdRecipe', async (req, res, next) => {
     if (results.affectedRows === 0) {
       throw { status: 400, message: "Invalid recipe supplied" };
     }
-    res.send({ status: 200, message: "The Recipe successfully added to my recipes" });
+    res.send({ status: 200, message: "The recipe successfully added to my recipes" });
   } catch (error) {
     next(error);
   }
@@ -142,6 +146,18 @@ router.get('/createdRecipe', async (req, res, next) => {
     next(error);
   }
 })
+
+/**
+ * This path returns all the family recipes
+ */
+router.get("/familyRecipes", async (req, res, next) => {
+  try {
+    const user_id = req.session.user_id;
+    res.send(await user_utils.getFamilyRecipes(user_id));
+  } catch (error) {
+    next(error);
+  }
+});
 
 
 module.exports = router;

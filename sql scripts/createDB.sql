@@ -19,16 +19,16 @@ CREATE TABLE
     recipes (
         recipe_id INT AUTO_INCREMENT PRIMARY KEY,
         user_id INT,
-        name VARCHAR(100),
-        imageURL VARCHAR(255),
-        preparationTimeInMinutes INT,
-        numOfLikes INT,
+        title VARCHAR(100),
+        image VARCHAR(255),
+        readyInMinutes INT,
+        aggregateLikes INT,
         vegan TINYINT(1),
         vegetarian TINYINT(1),
         glutenFree TINYINT(1),
         instructions TEXT,
         servings INT,
-        ingredients TEXT,
+        extendedIngredients TEXT,
         FOREIGN KEY (user_id) REFERENCES users(user_id)
     );
 
@@ -51,11 +51,13 @@ CREATE TABLE
 CREATE TABLE
     familyRecipe (
         recipe_id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(100),
-        imageURL VARCHAR(255),
-        preparationTimeInMinutes INT,
+        user_id INT,
+        title VARCHAR(100),
+        image VARCHAR(255),
+        readyInMinutes INT,
         author VARCHAR(100),
         occasion VARCHAR(100),
-        ingredients TEXT,
-        instructions TEXT
+        extendedIngredients TEXT,
+        instructions TEXT,
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
     );
