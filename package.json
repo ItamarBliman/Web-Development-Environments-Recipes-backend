@@ -4,7 +4,9 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js"
+    "start": "node main.js",
+    "dev": "nodemon main.js",
+    "server_connection": "node server_connection.js"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +23,8 @@
     "express-validator": "^6.4.1",
     "morgan": "^1.10.0",
     "mssql": "^6.2.0",
-    "nodemon": "^2.0.4",
+    "node": "^20.2.0",
+    "nodemon": "^2.0.22",
     "pg": "^8.2.1"
   },
   "devDependencies": {
