@@ -25,9 +25,9 @@ router.get("/search", async (req, res, next) => {
   try {
     const user_id = await recipes_utils.checkSession(req);
     const arrayRecipes = await recipes_utils.getFromSearchRecipes(req.query);
-    if (arrayRecipes.length == 0) {
-      throw { status: 404, message: "No recipes found" };
-    }
+    // if (arrayRecipes.length == 0) {
+    //   throw { status: 404, message: "No recipes found" };
+    // }
     res.send(await recipes_utils.getPreviewRecipes(arrayRecipes, user_id));
 
   } catch (error) {

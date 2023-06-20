@@ -21,7 +21,7 @@ async function getRecipeInformation(recipe_id) {
 
 exports.getRecipeDetails = async function getRecipeDetails(recipe_id) {
     const { data } = await getRecipeInformation(recipe_id);
-    const { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, extendedIngredients, instructions, servings } = data;
+    const { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, extendedIngredients, analyzedInstructions, servings } = data;
 
     let extendedIngredientsString = "";
     extendedIngredients?.forEach(ingredient => {
@@ -42,7 +42,7 @@ exports.getRecipeDetails = async function getRecipeDetails(recipe_id) {
         vegetarian: vegetarian,
         glutenFree: glutenFree,
         extendedIngredients: extendedIngredientsString,
-        instructions: instructions,
+        instructions: analyzedInstructions,
         servings: servings,
         favorite: false,
         watched: false
