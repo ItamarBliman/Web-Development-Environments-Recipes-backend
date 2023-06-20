@@ -46,10 +46,12 @@ USE mydb;
 
 drop table familyrecipe;
 
+drop table users;
+
 ALTER USER
     'root' @'localhost' IDENTIFIED
 WITH
-    mysql_native_password BY 'samira32167';
+    mysql_native_password BY 'pass_root@123';
 
 flush privileges;
 
